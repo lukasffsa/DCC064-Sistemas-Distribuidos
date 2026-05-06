@@ -2,6 +2,6 @@
 
 rodar em terminais separados
 
-- python broke.py
+- python broker.py
 - python camera-viewer.py
 - python viewer.py
