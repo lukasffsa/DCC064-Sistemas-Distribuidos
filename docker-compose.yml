@@ -1,0 +1,6 @@
+services:
+  broker:
+    build: .
+    container_name: broker
+    ports:
+      - "8765:8765"

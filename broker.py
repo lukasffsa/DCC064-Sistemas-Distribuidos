@@ -11,13 +11,16 @@ async def handler(ws):
 
     if role == "camera":
         cameras[node] = ws
-        print(f"[BROKER] câmera registrada: {node}")
-        async for data in ws:
-            for viewer_ws in list(clients.values()):
-                try:
-                    await viewer_ws.send(data)
-                except:
-                    pass
+        print(f"[BROKER] camera registrada: {node}")
+        try:
+            async for data in ws:
+                for viewer_node, viewer_ws in list(clients.items()):
+                    try:
+                        await viewer_ws.send(data)
+                    except websockets.ConnectionClosed:
+                        clients.pop(viewer_node, None)
+        finally:
+            cameras.pop(node, None)
 
     elif role == "viewer":
         clients[node] = ws

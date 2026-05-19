@@ -12,6 +12,8 @@ async def receive():
                 continue
             arr = np.frombuffer(base64.b64decode(msg["data"]), dtype=np.uint8)
             frame = cv2.imdecode(arr, cv2.IMREAD_COLOR)
+            if frame is None:
+                continue
             cv2.putText(frame, f"{msg['node']}", (10,25),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,200,100), 2)
             cv2.imshow("Camera", frame)
