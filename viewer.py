@@ -1,4 +1,4 @@
-import asyncio, websockets, cv2, base64, json, numpy as np
+import time, asyncio, websockets, cv2, base64, json, numpy as np
 
 BROKER_URI = "ws://127.0.0.1:8765"
 
@@ -14,7 +14,21 @@ async def receive():
             frame = cv2.imdecode(arr, cv2.IMREAD_COLOR)
             if frame is None:
                 continue
-            cv2.putText(frame, f"{msg['node']}", (10,25),
+
+            # calcular latencia ponta-a-ponta (ms) usando timestamp enviado pela camera
+            ts = msg.get("timestamp")
+            latency_ms = None
+            try:
+                if ts is not None:
+                    latency_ms = (time.time() - float(ts)) * 1000.0
+            except Exception:
+                latency_ms = None
+
+            label = msg.get("node", "camera")
+            if latency_ms is not None:
+                label = f"{label} | Latencia: {latency_ms:.1f}ms"
+
+            cv2.putText(frame, label, (10,25),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,200,100), 2)
             cv2.imshow("Camera", frame)
             if cv2.waitKey(1) & 0xFF == ord('q'):
