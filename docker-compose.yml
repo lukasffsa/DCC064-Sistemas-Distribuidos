@@ -1,0 +1,44 @@
+version: "3.8"
+
+services:
+  # [SD02] O Coordenador Central
+  broker:
+    build: .
+    command: python broker.py
+    ports:
+      - "8765:8765"
+    networks:
+      - sd-network
+
+  # [SD06] Componente Emissor
+  camera:
+    build: .
+    command: python camera-server.py
+    depends_on:
+      - broker
+    environment:
+      - BROKER_URI=ws://broker:8765
+      - CAM_ID=cam-01
+    devices:
+      - "/dev/video0:/dev/video0" # [IMPORTANTE] Dá acesso à sua webcam real
+    networks:
+      - sd-network
+
+  # [SD06] Componente Receptor
+  viewer:
+    build: .
+    command: python viewer.py
+    depends_on:
+      - broker
+    environment:
+      - BROKER_URI=ws://broker:8765
+      - VIEWER_ID=viewer-01
+      - DISPLAY=${DISPLAY} # Necessário para abrir a janela do OpenCV no seu monitor
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    networks:
+      - sd-network
+
+networks:
+  sd-network:
+    driver: bridge
